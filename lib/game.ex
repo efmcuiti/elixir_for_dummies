@@ -61,14 +61,15 @@ defmodule IslandsEngine.Game do
 
   def handle_call({:guess, player, coordinate}, _from, state) do
     oponent = oponent(state, player)
+    oponent_board = Player.get_board(oponent)
     Rules.guess_coordinate(state.fsm, player)
-    |> guess_reply(oponent.board, coordinate)
+    |> guess_reply(oponent_board, coordinate)
     |> forest_check(oponent, coordinate)
     |> win_check(oponent, state)
   end
 
   def set_islands(pid, player) when is_atom player do
-    GEnServer.call(pid, {:set_islands, player})
+    GenServer.call(pid, {:set_islands, player})
   end
 
   def handle_call({:set_islands, player}, _from, state) do
@@ -100,7 +101,7 @@ defmodule IslandsEngine.Game do
     Player.guess_coordinate(oponent_board, coordinate)
   end
 
-  defp guess_reply({:error, :action_out_of_sequence}, _oponent_board, _coordinate) do
+  defp guess_reply(reply, _oponent_board, _coordinate) do
     {:error, :action_out_of_sequence}
   end
 
